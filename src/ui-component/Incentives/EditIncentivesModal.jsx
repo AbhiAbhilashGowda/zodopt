@@ -1,8 +1,8 @@
-// CreateCustomerModal.jsx
+// EditCustomerModal.jsx
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl, Checkbox, ListItemText } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid, Select, MenuItem } from '@mui/material';
 
-const CreateCustomerModal = ({ open, handleClose, formData, handleInputChange, handleSubmit, products }) => {
+const EditIncentivesModal = ({ open, handleClose, formData, handleInputChange, handleSubmit, products }) => {
   const getProductOptions = () => {
     return products.map((product) => (
       <MenuItem key={product.id} value={product.id}>
@@ -13,19 +13,9 @@ const CreateCustomerModal = ({ open, handleClose, formData, handleInputChange, h
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg">
-      <DialogTitle style={{ backgroundColor: '#f0f0f0', padding: '16px 24px', fontSize: 16 }}>Create Customer</DialogTitle>
+      <DialogTitle style={{ backgroundColor: '#f0f0f0', padding: '16px 24px', fontSize: 16 }}>Edit Incentive</DialogTitle>
       <DialogContent style={{ padding: '30px' }}>
         <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="Customer Name"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleInputChange}
-              style={{ marginBottom: '8px' }}
-            />
-          </Grid>
           <Grid item xs={6}>
             <Select
               labelId="products-label"
@@ -43,18 +33,6 @@ const CreateCustomerModal = ({ open, handleClose, formData, handleInputChange, h
           <Grid item xs={6}>
             <TextField
               fullWidth
-              type="number"
-              label="Cost"
-              name="cost"
-              value={formData.cost}
-              onChange={handleInputChange}
-              style={{ marginBottom: '8px' }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              fullWidth
-              type="number"
               label="Incentive Percentage"
               name="incPer"
               value={formData.incPer}
@@ -65,10 +43,29 @@ const CreateCustomerModal = ({ open, handleClose, formData, handleInputChange, h
           <Grid item xs={6}>
             <TextField
               fullWidth
-              type="number"
-              label="Incentive Value"
-              name="incValue"
-              value={formData.incValue}
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleInputChange}
+              style={{ marginBottom: '8px' }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleInputChange}
+              style={{ marginBottom: '8px' }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Status"
+              name="status"
+              value={formData.status}
               onChange={handleInputChange}
               style={{ marginBottom: '8px' }}
             />
@@ -80,11 +77,11 @@ const CreateCustomerModal = ({ open, handleClose, formData, handleInputChange, h
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained" color="primary">
-          Submit
+          Update
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default CreateCustomerModal;
+export default EditIncentivesModal;

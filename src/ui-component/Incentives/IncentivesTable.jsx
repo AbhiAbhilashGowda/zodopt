@@ -1,24 +1,43 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TablePagination } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TablePagination,
+  IconButton
+} from '@mui/material';
 import PageHeader from 'ui-component/common/PageHeader';
 import CreateIncentiveModal from './CreateIncentivesModal';
-import { collection, addDoc } from 'firebase/firestore'; // Import Firestore functions
-import { firestore } from 'firebase';
 import { StyledTableCell } from 'ui-component/Leads/util';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIncentivesModal from './EditIncentivesModal';
 
-export default function IncentivesTable({ incentives, products, getIncentives }) {
+export default function IncentivesTable({ incentives, products, fetchIncentives, addIncentive, updateIncentive, deleteIncentive }) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
   const [open, setOpen] = useState(false);
-
-  // Initialize formData state
+  const [currentIncentive, setCurrentIncentive] = useState(null);
   const [formData, setFormData] = useState({
-    productName: '',
+    products: [],
     incPer: '',
     startDate: '',
     endDate: '',
     status: ''
   });
+
+  const initialFormData = {
+    products: [],
+    incPer: '',
+    startDate: '',
+    endDate: '',
+    status: ''
+  };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -32,7 +51,17 @@ export default function IncentivesTable({ incentives, products, getIncentives })
   const visibleRows = React.useMemo(() => incentives.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage), [page, rowsPerPage]);
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setCurrentIncentive(null);
+    setFormData({
+      products: [],
+      incPer: '',
+      startDate: '',
+      endDate: '',
+      status: ''
+    });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,21 +71,59 @@ export default function IncentivesTable({ incentives, products, getIncentives })
     }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      // Add a new document with generated ID to "incentives" collection
-      const docRef = await addDoc(collection(firestore, 'incentives'), {
-        productName: formData.productName,
-        incPer: formData.incPer,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        status: formData.status
+  const handleSubmit = () => {
+    if (currentIncentive) {
+      updateIncentive(currentIncentive.id, formData);
+    } else {
+      addIncentive(formData);
+    }
+    handleClose();
+  };
+
+  const handleDelete = (id) => {
+    deleteIncentive(id);
+  };
+
+  const getProductNames = (productIds) => {
+    return productIds
+      ?.map((productId) => {
+        const product = products?.find((prod) => prod.id === productId);
+        return product ? product.name : '';
+      })
+      .join(', ');
+  };
+
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editIncentiveId, setEditIncentiveId] = useState(null);
+
+  const handleEditModalOpen = (incentiveId) => {
+    const incentive = incentives?.find((c) => c.id === incentiveId);
+    if (incentive) {
+      setFormData({
+        products: incentive.products,
+        incPer: incentive.incPer,
+        startDate: incentive.startDate,
+        endDate: incentive.endDate,
+        status: incentive.status
       });
-      console.log('Document written with ID: ', docRef.id);
-      getIncentives(); // Fetch incentives again to update the list
-      handleClose(); // Close the modal after successful submission
+      setOpenEditModal(true);
+      setEditIncentiveId(incentiveId);
+    }
+  };
+
+  const handleEditModalClose = () => {
+    setOpenEditModal(false);
+    setEditIncentiveId(null);
+    setFormData(initialFormData);
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      await updateIncentive(editIncentiveId, formData);
+      await fetchIncentives();
+      handleEditModalClose();
     } catch (error) {
-      console.error('Error adding document: ', error);
+      console.error('Error updating customer:', error);
     }
   };
 
@@ -93,16 +160,19 @@ export default function IncentivesTable({ incentives, products, getIncentives })
           </TableHead>
           <TableBody>
             {visibleRows.map((incentive) => (
-              <TableRow key={incentive.productName}>
-                <StyledTableCell>{incentive.productName}</StyledTableCell>
+              <TableRow key={incentive.id}>
+                <StyledTableCell>{getProductNames(incentive.products)}</StyledTableCell>
                 <StyledTableCell>{incentive.incPer}</StyledTableCell>
                 <StyledTableCell>{incentive.startDate}</StyledTableCell>
                 <StyledTableCell>{incentive.endDate}</StyledTableCell>
                 <StyledTableCell>{incentive.status}</StyledTableCell>
                 <StyledTableCell>
-                  <Button onClick={() => console.log(`Edit ${incentive.productName}`)} variant="outlined" color="primary">
-                    Edit
-                  </Button>
+                  <IconButton aria-label="edit" onClick={() => handleEditModalOpen(incentive.id)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton aria-label="delete" onClick={() => handleDelete(incentive.id)}>
+                    <DeleteIcon />
+                  </IconButton>
                 </StyledTableCell>
               </TableRow>
             ))}
@@ -126,6 +196,15 @@ export default function IncentivesTable({ incentives, products, getIncentives })
         formData={formData}
         handleInputChange={handleInputChange}
         handleSubmit={handleSubmit}
+        products={products}
+      />
+
+      <EditIncentivesModal
+        open={openEditModal}
+        handleClose={handleEditModalClose}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleEditSubmit}
         products={products}
       />
     </React.Fragment>

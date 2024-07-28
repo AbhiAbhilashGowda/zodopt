@@ -5,6 +5,7 @@ import { firestore } from 'firebase';
 
 const ProductsContainer = () => {
   const [products, setProducts] = useState([]);
+  console.log('products', products);
   const [loading, setLoading] = useState(true); // State to manage loading indicator
 
   // Function to fetch all products from Firestore
@@ -21,6 +22,7 @@ const ProductsContainer = () => {
     } catch (error) {
       setLoading(false); // Hide loading indicator
       console.error('Error fetching products: ', error);
+      console.error('error?.message): ', error?.message);
     }
   };
 

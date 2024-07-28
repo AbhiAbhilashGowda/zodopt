@@ -14,12 +14,12 @@ import {
 } from '@mui/material';
 
 export default function CreateIncentiveModal({ open, handleClose, formData, setFormData, handleInputChange, handleSubmit, products }) {
-  const handleProductChange = (event) => {
-    const selectedProductId = event.target.value;
-    setFormData((prevState) => ({
-      ...prevState,
-      products: selectedProductId
-    }));
+  const getProductOptions = () => {
+    return products.map((product) => (
+      <MenuItem key={product.id} value={product.id}>
+        {product.name}
+      </MenuItem>
+    ));
   };
 
   return (
@@ -27,25 +27,19 @@ export default function CreateIncentiveModal({ open, handleClose, formData, setF
       <DialogTitle style={{ backgroundColor: '#f0f0f0', padding: '16px 24px', fontSize: 16 }}>Create Incentive</DialogTitle>
       <DialogContent style={{ padding: '30px' }}>
         <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <FormControl fullWidth style={{ minWidth: 200, maxWidth: 400, marginBottom: '8px' }}>
-              <InputLabel id="products-label">Products</InputLabel>
-              <Select
-                labelId="products-label"
-                id="products"
-                fullWidth
-                value={formData.products}
-                onChange={handleProductChange}
-                name="products"
-                renderValue={(selected) => products.find((product) => product.id === selected)?.name}
-              >
-                {products.map((product) => (
-                  <MenuItem key={product.id} value={product.id}>
-                    {product.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        <Grid item xs={6}>
+            <Select
+              labelId="products-label"
+              id="products"
+              multiple
+              fullWidth
+              value={formData.products} // Ensure formData.products is always an array
+              onChange={handleInputChange}
+              name="products"
+              renderValue={(selected) => selected.map((id) => products.find((p) => p.id === id)?.name).join(', ')}
+            >
+              {getProductOptions()}
+            </Select>
           </Grid>
           <Grid item xs={6}>
             <TextField

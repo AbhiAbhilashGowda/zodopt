@@ -7,11 +7,12 @@ const LeadsContainer = () => {
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [leads, setLeads] = useState([]);
+  console.log('leads', leads);
 
   useEffect(() => {
     const fetchProductsAndUsers = async () => {
       try {
-        // Fetch products data
+        // Fetch products data  
         const productsSnapshot = await getDocs(collection(firestore, 'products'));
         const productsData = productsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
@@ -55,9 +56,7 @@ const LeadsContainer = () => {
       console.log('Lead updated successfully:', leadId);
 
       // Update local state with updated lead data
-      const updatedLeads = leads.map((lead) =>
-        lead.id === leadId ? { ...lead, ...updatedLeadData } : lead
-      );
+      const updatedLeads = leads.map((lead) => (lead.id === leadId ? { ...lead, ...updatedLeadData } : lead));
       setLeads(updatedLeads);
     } catch (error) {
       console.error('Error updating lead:', error);

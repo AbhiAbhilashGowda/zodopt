@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -22,10 +22,6 @@ import chartData from './chart-data/total-growth-bar-chart';
 
 const status = [
   {
-    value: 'today',
-    label: 'Today'
-  },
-  {
     value: 'month',
     label: 'This Month'
   },
@@ -37,8 +33,8 @@ const status = [
 
 // ==============================|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||============================== //
 
-const TotalGrowthBarChart = ({ isLoading }) => {
-  const [value, setValue] = React.useState('today');
+const LeadsBarChart = ({ isLoading, leads }) => {
+  const [value, setValue] = React.useState('month');
   const theme = useTheme();
 
   const { primary } = theme.palette.text;
@@ -57,7 +53,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
       xaxis: {
         labels: {
           style: {
-            colors: [primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary]
+            colors: [primary]
           }
         }
       },
@@ -79,6 +75,10 @@ const TotalGrowthBarChart = ({ isLoading }) => {
     }
   }, [primary200, primaryDark, secondaryMain, secondaryLight, primary, divider, isLoading, grey500]);
 
+  const totalLeadValue = leads
+    ?.map((item) => parseFloat(item.lead_value)) // Convert lead_value to number
+    .reduce((acc, curr) => acc + curr, 0); // Sum up the values
+
   return (
     <>
       {isLoading ? (
@@ -91,10 +91,10 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                 <Grid item>
                   <Grid container direction="column" spacing={1}>
                     <Grid item>
-                      <Typography variant="subtitle2">Total Growth</Typography>
+                      <Typography variant="subtitle2">Total Lead value</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography variant="h3">$2,324.00</Typography>
+                      <Typography variant="h3">₹ {totalLeadValue}</Typography>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -127,8 +127,4 @@ const TotalGrowthBarChart = ({ isLoading }) => {
   );
 };
 
-TotalGrowthBarChart.propTypes = {
-  isLoading: PropTypes.bool
-};
-
-export default TotalGrowthBarChart;
+export default LeadsBarChart;

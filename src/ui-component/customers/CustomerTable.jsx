@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
-import EditCustomerModal from './EditCustomerModal'; // Import your edit customer modal
-import CreateCustomerModal from './CreateCustomerModal'; // Import your create customer modal
+import { Table, TableBody, TableContainer, TableHead, TableRow, Paper, Button, IconButton, TablePagination } from '@mui/material';
+import EditCustomerModal from './EditCustomerModal';
+import CreateCustomerModal from './CreateCustomerModal';
 import PageHeader from 'ui-component/common/PageHeader';
+import { StyledTableCell } from './util';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, updateCustomer, deleteCustomer }) => {
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(0);
+
   const initialFormData = {
     customerName: '',
-    productName: '',
+    products: [],
     cost: '',
     incPer: '',
     incValue: ''
   };
 
   const [formData, setFormData] = useState(initialFormData);
-  const [openCreateModal, setOpenCreateModal] = useState(false); // State for Create modal
-  const [openEditModal, setOpenEditModal] = useState(false); // State for Edit modal
-  const [editCustomerId, setEditCustomerId] = useState(null); // State for editing customer ID
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editCustomerId, setEditCustomerId] = useState(null);
 
   const handleEditModalOpen = (customerId) => {
     const customer = customers.find((c) => c.id === customerId);
     if (customer) {
       setFormData({
         customerName: customer.customerName,
-        productName: customer.productName,
+        products: customer.products,
         cost: customer.cost,
         incPer: customer.incPer,
         incValue: customer.incValue
@@ -36,17 +42,17 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
   const handleEditModalClose = () => {
     setOpenEditModal(false);
     setEditCustomerId(null);
-    setFormData(initialFormData); // Reset formData
+    setFormData(initialFormData);
   };
 
   const handleCreateModalOpen = () => {
     setOpenCreateModal(true);
-    setFormData(initialFormData); // Reset formData
+    setFormData(initialFormData);
   };
 
   const handleCreateModalClose = () => {
     setOpenCreateModal(false);
-    setFormData(initialFormData); // Reset formData
+    setFormData(initialFormData);
   };
 
   const handleInputChange = (e) => {
@@ -60,8 +66,8 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
   const handleCreateSubmit = async () => {
     try {
       await createCustomer(formData);
-      await fetchCustomers(); // Refresh customers data
-      handleCreateModalClose(); // Close create modal
+      await fetchCustomers();
+      handleCreateModalClose();
     } catch (error) {
       console.error('Error creating customer:', error);
     }
@@ -70,8 +76,8 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
   const handleEditSubmit = async () => {
     try {
       await updateCustomer(editCustomerId, formData);
-      await fetchCustomers(); // Refresh customers data
-      handleEditModalClose(); // Close edit modal
+      await fetchCustomers();
+      handleEditModalClose();
     } catch (error) {
       console.error('Error updating customer:', error);
     }
@@ -80,9 +86,29 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
   const handleDeleteCustomer = async (customerId) => {
     try {
       await deleteCustomer(customerId);
-      await fetchCustomers(); // Refresh customers data
+      await fetchCustomers();
     } catch (error) {
       console.error('Error deleting customer:', error);
+    }
+  };
+
+  const getProductNames = (productIds) => {
+    return productIds
+      ?.map((productId) => {
+        const product = products?.find((prod) => prod.id === productId);
+        return product ? product.name : '';
+      })
+      .join(', ');
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    if (newPage >= 0 && newPage < Math.ceil(customers.length / rowsPerPage)) {
+      setPage(newPage);
     }
   };
 
@@ -109,54 +135,62 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
         <Table sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Product Name</TableCell>
-              <TableCell>Cost (₹)</TableCell>
-              <TableCell>INC Per</TableCell>
-              <TableCell>INC Value (₹)</TableCell>
-              <TableCell>Actions</TableCell>
+              <StyledTableCell>Name</StyledTableCell>
+              <StyledTableCell>Product Name</StyledTableCell>
+              <StyledTableCell>Cost (₹)</StyledTableCell>
+              <StyledTableCell>INC Per</StyledTableCell>
+              <StyledTableCell>INC Value (₹)</StyledTableCell>
+              <StyledTableCell>Actions</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.map((row) => (
+            {(rowsPerPage > 0 ? customers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers).map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.customerName}</TableCell>
-                <TableCell>{row.productName}</TableCell>
-                <TableCell>{row.cost}</TableCell>
-                <TableCell>{row.incPer}</TableCell>
-                <TableCell>{row.incValue}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleEditModalOpen(row.id)} variant="outlined" color="primary">
-                    Edit
-                  </Button>
-                  <Button onClick={() => handleDeleteCustomer(row.id)} variant="outlined" color="secondary">
-                    Delete
-                  </Button>
-                </TableCell>
+                <StyledTableCell>{row.customerName}</StyledTableCell>
+                <StyledTableCell>{getProductNames(row.products)}</StyledTableCell>
+                <StyledTableCell>{row.cost}</StyledTableCell>
+                <StyledTableCell>{row.incPer}</StyledTableCell>
+                <StyledTableCell>{row.incValue}</StyledTableCell>
+                <StyledTableCell>
+                  <IconButton onClick={() => handleEditModalOpen(row.id)} aria-label="edit">
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleDeleteCustomer(row.id)} aria-label="delete">
+                    <DeleteIcon />
+                  </IconButton>
+                </StyledTableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Edit customer modal */}
-      <EditCustomerModal
-        open={openEditModal} // Pass state to conditionally render the modal
-        handleClose={handleEditModalClose} // Pass close function to modal
-        formData={formData} // Pass formData to manage state in modal
-        handleInputChange={handleInputChange} // Pass input change handler to update formData
-        handleSubmit={handleEditSubmit} // Pass submit handler to handle form submission
-        products={products} // Pass products to the modal
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 20]}
+        component="div"
+        count={customers.length} // Fix: use customers.length here
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
-      {/* Create customer modal */}
+      <EditCustomerModal
+        open={openEditModal}
+        handleClose={handleEditModalClose}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleEditSubmit}
+        products={products}
+      />
+
       <CreateCustomerModal
-        open={openCreateModal} // Pass state to conditionally render the modal
-        handleClose={handleCreateModalClose} // Pass close function to modal
-        formData={formData} // Pass formData to manage state in modal
-        handleInputChange={handleInputChange} // Pass input change handler to update formData
-        handleSubmit={handleCreateSubmit} // Pass submit handler to handle form submission
-        products={products} // Pass products to the modal
+        open={openCreateModal}
+        handleClose={handleCreateModalClose}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleCreateSubmit}
+        products={products}
       />
     </React.Fragment>
   );

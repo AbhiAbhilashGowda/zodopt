@@ -1,39 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { firestore } from 'firebase';
 import IncentivesTable from 'ui-component/Incentives/IncentivesTable';
 
-const CustomersContainer = () => {
+const IncentivesContainer = () => {
   const [incentives, setIncentives] = useState([]);
   console.log('incentives', incentives);
-
   const [products, setProducts] = useState([]);
-  console.log('products', products);
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true); // State to manage loading indicator
-
-  // Function to fetch all incentives from Firestore
-  const getIncentives = async () => {
+  const fetchIncentives = async () => {
     try {
-      setLoading(true); // Show loading indicator
+      setLoading(true);
       const querySnapshot = await getDocs(collection(firestore, 'incentives'));
-      const usersArray = querySnapshot.docs.map((doc) => ({
+      const incentivesArray = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
       }));
-      setIncentives(usersArray);
+      setIncentives(incentivesArray);
     } catch (error) {
-      console.error('Error fetching users: ', error);
+      console.error('Error fetching incentives: ', error);
     } finally {
-      setLoading(false); // Hide loading indicator
+      setLoading(false);
     }
   };
-  useEffect(() => {
-    getIncentives();
-  }, []);
 
-  // Function to fetch all products from Firestore
-  const getProducts = async () => {
+  const fetchProducts = async () => {
     try {
       const querySnapshot = await getDocs(collection(firestore, 'products'));
       const productsArray = querySnapshot.docs.map((doc) => ({
@@ -45,19 +37,57 @@ const CustomersContainer = () => {
       console.error('Error fetching products: ', error);
     }
   };
+
+  const addIncentive = async (newIncentive) => {
+    console.log('newIncentive', newIncentive);
+    try {
+      await addDoc(collection(firestore, 'incentives'), newIncentive);
+      fetchIncentives();
+    } catch (error) {
+      console.error('Error adding incentive: ', error);
+    }
+  };
+
+  const updateIncentive = async (id, updatedIncentive) => {
+    try {
+      const incentiveDoc = doc(firestore, 'incentives', id);
+      await updateDoc(incentiveDoc, updatedIncentive);
+      fetchIncentives();
+    } catch (error) {
+      console.error('Error updating incentive: ', error);
+    }
+  };
+
+  const deleteIncentive = async (id) => {
+    try {
+      const incentiveDoc = doc(firestore, 'incentives', id);
+      await deleteDoc(incentiveDoc);
+      fetchIncentives();
+    } catch (error) {
+      console.error('Error deleting incentive: ', error);
+    }
+  };
+
   useEffect(() => {
-    getProducts();
+    fetchIncentives();
+    fetchProducts();
   }, []);
 
   return (
     <div>
-      {/* Display loading indicator */}
       {loading && <div>Loading...</div>}
-
-      {/* Pass users and products state to UsersTable component */}
-      {!loading && <IncentivesTable incentives={incentives} products={products} getIncentives={getIncentives} />}
+      {!loading && (
+        <IncentivesTable
+          incentives={incentives}
+          products={products}
+          fetchIncentives={fetchIncentives}
+          addIncentive={addIncentive}
+          updateIncentive={updateIncentive}
+          deleteIncentive={deleteIncentive}
+        />
+      )}
     </div>
   );
 };
 
-export default CustomersContainer;
+export default IncentivesContainer;

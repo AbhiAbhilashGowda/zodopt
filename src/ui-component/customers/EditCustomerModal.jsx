@@ -3,6 +3,14 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid, Select, MenuItem } from '@mui/material';
 
 const EditCustomerModal = ({ open, handleClose, formData, handleInputChange, handleSubmit, products }) => {
+  const getProductOptions = () => {
+    return products.map((product) => (
+      <MenuItem key={product.id} value={product.id}>
+        {product.name}
+      </MenuItem>
+    ));
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg">
       <DialogTitle style={{ backgroundColor: '#f0f0f0', padding: '16px 24px', fontSize: 16 }}>Edit Customer</DialogTitle>
@@ -13,28 +21,26 @@ const EditCustomerModal = ({ open, handleClose, formData, handleInputChange, han
               fullWidth
               label="Customer Name"
               name="name"
-              value={formData.name}
+              value={formData.customerName}
               onChange={handleInputChange}
               style={{ marginBottom: '8px' }}
             />
           </Grid>
           <Grid item xs={6}>
             <Select
-              labelId="product-label"
-              id="product"
-              name="product"
-              value={formData.product}
-              onChange={handleInputChange}
+              labelId="products-label"
+              id="products"
+              multiple
               fullWidth
-              style={{ marginBottom: '8px' }}
+              value={formData.products} // Ensure formData.products is always an array
+              onChange={handleInputChange}
+              name="products"
+              renderValue={(selected) => selected.map((id) => products.find((p) => p.id === id)?.name).join(', ')}
             >
-              {products?.map((product) => (
-                <MenuItem key={product.id} value={product.name}>
-                  {product.name}
-                </MenuItem>
-              ))}
+              {getProductOptions()}
             </Select>
           </Grid>
+
           <Grid item xs={6}>
             <TextField
               fullWidth

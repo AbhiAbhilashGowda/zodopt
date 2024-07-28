@@ -33,6 +33,11 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Google from 'assets/images/icons/social-google.svg';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from 'slices/authSlice';
+import { login } from 'services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const AuthLogin = ({ ...others }) => {
   const theme = useTheme();
@@ -51,6 +56,23 @@ const AuthLogin = ({ ...others }) => {
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await login({ email, password });
+      dispatch(loginSuccess(user));
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      // Handle login error (show message, etc.)
+    }
   };
 
   return (
@@ -196,7 +218,16 @@ const AuthLogin = ({ ...others }) => {
 
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
-                <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                <Button
+                  disableElevation
+                  disabled={isSubmitting}
+                  fullWidth
+                  size="large"
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleSubmit}
+                >
                   Sign in
                 </Button>
               </AnimateButton>

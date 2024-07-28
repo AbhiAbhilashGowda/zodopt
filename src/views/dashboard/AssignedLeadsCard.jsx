@@ -11,10 +11,11 @@ import EarningIcon from 'assets/images/icons/earning.svg';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
-const EarningCard = ({ isLoading, leads }) => {
+const AssignedLeadsCard = ({ isLoading, leads }) => {
   console.log('leads in dash', leads);
   const theme = useTheme();
 
+  let unassignedLeadsCount = leads?.filter((item) => item?.assigned_status === 'assigned')?.length || 0;
   return (
     <>
       {isLoading ? (
@@ -89,7 +90,9 @@ const EarningCard = ({ isLoading, leads }) => {
               <Grid item>
                 <Grid container alignItems="center">
                   <Grid item>
-                    <Typography sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>{leads.length || 0}</Typography>
+                    <Typography sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>
+                      {unassignedLeadsCount}
+                    </Typography>
                   </Grid>
                   <Grid item>
                     <Avatar
@@ -113,7 +116,7 @@ const EarningCard = ({ isLoading, leads }) => {
                     color: 'white'
                   }}
                 >
-                  Total Leads
+                  Assigned Leads
                 </Typography>
               </Grid>
             </Grid>
@@ -124,8 +127,8 @@ const EarningCard = ({ isLoading, leads }) => {
   );
 };
 
-EarningCard.propTypes = {
+AssignedLeadsCard.propTypes = {
   isLoading: PropTypes.bool
 };
 
-export default EarningCard;
+export default AssignedLeadsCard;

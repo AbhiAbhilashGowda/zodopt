@@ -8,10 +8,10 @@ import UsersContainer from 'container/UsersContainer';
 import ProductsContainer from 'container/ProductsContainer';
 import CustomersContainer from 'container/CustomersContainer';
 import IncentivesContainer from 'container/IncentivesContainer';
+import PrivateRoute from 'privateRoute';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
 
 const MainRoutes = {
   path: '/',
@@ -19,7 +19,7 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <DashboardDefault />
+      element:<PrivateRoute element={<DashboardDefault />} />
     },
     {
       path: 'dashboard',
@@ -75,28 +75,6 @@ const MainRoutes = {
         }
       ]
     },
-    // {
-    //   path: 'icons',
-    //   children: [
-    //     {
-    //       path: 'tabler-icons',
-    //       element: <UtilsTablerIcons />
-    //     }
-    //   ]
-    // },
-    // {
-    //   path: 'icons',
-    //   children: [
-    //     {
-    //       path: 'material-icons',
-    //       element: <UtilsMaterialIcons />
-    //     }
-    //   ]
-    // },
-    {
-      path: 'sample-page',
-      element: <SamplePage />
-    }
   ]
 };
 
