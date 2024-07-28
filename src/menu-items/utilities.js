@@ -1,45 +1,42 @@
-// assets
-import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons-react';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PeopleIcon from '@mui/icons-material/People';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-
-// constant
-const icons = {
-  IconTypography,
-  IconPalette,
-  IconShadow,
-  IconWindmill
-};
-
-// ==============================|| UTILITIES MENU ITEMS ||============================== //
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const utilities = {
-  id: 'utilities',
+  id: 'list',
   type: 'group',
   children: [
+    {
+      id: 'dashboard',
+      title: 'Dashboard',
+      type: 'item',
+      url: '/',
+      icon: DashboardIcon,
+      breadcrumbs: false
+    },
     {
       id: 'products',
       title: 'Products',
       type: 'item',
-      url: '/utils/products',
+      url: 'products',
       icon: InventoryIcon,
       breadcrumbs: false
     },
     {
-      id: 'Users',
+      id: 'users',
       title: 'Users',
       type: 'item',
-      url: '/utils/users',
+      url: 'users',
       icon: PeopleIcon,
       breadcrumbs: false
     },
     {
-      id: 'Leads',
+      id: 'leads',
       title: 'Leads',
       type: 'item',
-      url: '/utils/leads',
+      url: 'leads',
       icon: LeaderboardIcon,
       breadcrumbs: false
     },
@@ -47,7 +44,7 @@ const utilities = {
       id: 'customers',
       title: 'Customers',
       type: 'item',
-      url: '/utils/customers',
+      url: 'customers',
       icon: PeopleIcon,
       breadcrumbs: false
     },
@@ -55,7 +52,7 @@ const utilities = {
       id: 'incentives',
       title: 'Incentives',
       type: 'item',
-      url: '/utils/incentives',
+      url: 'incentives',
       icon: CurrencyRupeeIcon,
       breadcrumbs: false
     }

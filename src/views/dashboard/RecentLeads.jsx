@@ -86,7 +86,7 @@ const RecentLeads = ({ isLoading, leads, users }) => {
             </Grid>
           </CardContent>
           <CardActions sx={{ p: 1.25, pt: 0, justifyContent: 'center' }}>
-            <Link to={'/utils/leads'}>
+            <Link to={'/leads'}>
               <Button size="small">
                 View All
                 <ChevronRightOutlinedIcon />

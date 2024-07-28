@@ -42,7 +42,7 @@ export default function UsersTable({ users, products, getUsers }) {
       setFormData({
         name: user.name,
         phone: user.phone,
-        company: user.company_name,
+        company: user.company,
         products: user.Products // Assuming formData.products is an array of product IDs
       });
       setOpenEditModal(true);
@@ -154,7 +154,7 @@ export default function UsersTable({ users, products, getUsers }) {
 
   // Function to get product names based on IDs
   const getProductNames = (productIds) => {
-    return productIds.map((productId) => {
+    return productIds?.map((productId) => {
       const product = products.find((prod) => prod.id === productId);
       return product ? product.name : '';
     });
@@ -195,8 +195,8 @@ export default function UsersTable({ users, products, getUsers }) {
               <StyledTableRow key={user.id}>
                 <StyledTableCell>{user.name}</StyledTableCell>
                 <StyledTableCell>{user.phone}</StyledTableCell>
-                <StyledTableCell>{user.company_name}</StyledTableCell>
-                <StyledTableCell>{getProductNames(user.Products).join(', ')}</StyledTableCell>
+                <StyledTableCell>{user.company}</StyledTableCell>
+                <StyledTableCell>{getProductNames(user?.Products)?.join(', ')}</StyledTableCell>
                 <StyledTableCell>
                   <IconButton onClick={() => handleOpenEditModal(user.id)} aria-label="edit">
                     <EditIcon />

@@ -1,28 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 
 // third-party
@@ -31,31 +25,23 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import UpgradePlanCard from './UpgradePlanCard';
 import User1 from 'assets/images/users/user-round.svg';
 
 // assets
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-react';
-
-// ==============================|| PROFILE MENU ||============================== //
+import { IconLogout } from '@tabler/icons-react';
+import { signOut } from 'firebase/auth';
+import { firestore } from 'firebase';
+import { REGISTER, STORE_USER_DETAILS } from 'store/actions';
 
 const ProfileSection = () => {
   const theme = useTheme();
-  const customization = useSelector((state) => state.customization);
+  const userDetails = useSelector((state) => state.authReducer.userDetails);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [sdm, setSdm] = useState(true);
-  const [value, setValue] = useState('');
-  const [notification, setNotification] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
-  /**
-   * anchorRef is used on different componets and specifying one type leads to other components throwing an error
-   * */
   const anchorRef = useRef(null);
-  const handleLogout = async () => {
-    console.log('Logout');
-  };
 
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
@@ -64,14 +50,6 @@ const ProfileSection = () => {
     setOpen(false);
   };
 
-  const handleListItemClick = (event, index, route = '') => {
-    setSelectedIndex(index);
-    handleClose(event);
-
-    if (route && route !== '') {
-      navigate(route);
-    }
-  };
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -85,6 +63,36 @@ const ProfileSection = () => {
     prevOpen.current = open;
   }, [open]);
 
+  const handleLogout = async () => {
+    try {
+      console.log('Logout');
+      // Sign out the user
+      await signOut(firestore);
+
+      // Dispatch action to clear authentication state
+      dispatch({
+        type: REGISTER,
+        payload: {
+          isLoggedIn: false,
+          accessToken: ''
+        }
+      });
+
+      dispatch({
+        type: STORE_USER_DETAILS,
+        payload: {
+          userDetails: {}
+        }
+      });
+
+      // Navigate to the login page or home page
+      navigate('/login'); // Adjust the path as needed
+
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   return (
     <>
       <Chip
@@ -154,10 +162,10 @@ const ProfileSection = () => {
                   <Box sx={{ p: 2, pb: 0 }}>
                     <Stack>
                       <Typography component="span" variant="h4" sx={{ fontWeight: 400 }} style={{ paddingBottom: 10 }}>
-                        Shivakumar
+                        {userDetails?.name}
                       </Typography>
                       <Typography component="span" variant="h5">
-                        Admin
+                        {userDetails?.roleDetails?.name}
                       </Typography>
                     </Stack>
                   </Box>
@@ -180,11 +188,7 @@ const ProfileSection = () => {
                           }
                         }}
                       >
-                        <ListItemButton
-                          sx={{ borderRadius: `${customization.borderRadius}px` }}
-                          selected={selectedIndex === 4}
-                          onClick={handleLogout}
-                        >
+                        <ListItemButton sx={{ borderRadius: 0 }} selected={selectedIndex === 4} onClick={handleLogout}>
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="1.3rem" />
                           </ListItemIcon>
