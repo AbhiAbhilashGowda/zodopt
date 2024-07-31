@@ -1,0 +1,14 @@
+Tables			C	R	U	D
+
+1. Products		D	D	D	D
+2. Users		D	D	D	D
+3. Leads		D	D	D	D
+4. Customer		D	D	NN	D
+5. Incentives						
+
+
+DashBoard
+
+Register
+Login
+Role based auth

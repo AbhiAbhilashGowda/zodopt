@@ -7,7 +7,7 @@ import { StyledTableCell } from './util';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, updateCustomer, deleteCustomer }) => {
+const CustomersTable = ({ customers, products, userRole, fetchCustomers, createCustomer, updateCustomer, deleteCustomer }) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
 
@@ -92,13 +92,9 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
     }
   };
 
-  const getProductNames = (productIds) => {
-    return productIds
-      ?.map((productId) => {
-        const product = products?.find((prod) => prod.id === productId);
-        return product ? product.name : '';
-      })
-      .join(', ');
+  const getProductNames = (productId) => {
+    const product = products?.find((prod) => prod.id === productId);
+    return product ? product?.name : '';
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -125,9 +121,11 @@ const CustomersTable = ({ customers, products, fetchCustomers, createCustomer, u
           <input placeholder="search" style={{ height: 30, width: 250, borderRadius: 3 }} />
         </span>
         <span>
-          <Button variant="contained" style={{ backgroundColor: '#111936', padding: '5px 25px' }} onClick={handleCreateModalOpen}>
-            Create
-          </Button>
+          {userRole === 'admin' && (
+            <Button variant="contained" style={{ backgroundColor: '#111936', padding: '5px 25px' }} onClick={handleCreateModalOpen}>
+              Create
+            </Button>
+          )}
         </span>
       </div>
 

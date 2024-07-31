@@ -17,20 +17,36 @@ import CreateLeads from './CreateLeadsModal';
 import EditLeadsModal from './EditLeadsModal';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useSelector } from 'react-redux';
+import PersonIcon from '@mui/icons-material/Person';
+import AssignUserModal from './AssignUserModal';
+import CreateCustomerModal from 'ui-component/customers/CreateCustomerModal';
 
-const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, handleDeleteLead }) => {
+const AllLeads = ({
+  leads,
+  products,
+  users,
+  userRole,
+  incentives,
+  handleCreateLead,
+  handleUpdateLead,
+  handleDeleteLead,
+  handleConvertCustomer
+}) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
   const [openCreateModal, setOpenCreateModal] = useState(false); // State for Create modal
   const [openEditModal, setOpenEditModal] = useState(false); // State for Edit modal
   const [editLeadId, setEditLeadId] = useState(null); // State for editing lead ID
+  const [openAssignModal, setOpenAssignModal] = useState(false); // State for assign user modal
+  const [openCustomerModal, setOpenCustomerModal] = useState(false); // State for assign user modal
 
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
     customer_email: '',
     customer_company: '',
-    products: [],
+    products: '',
     username: '',
     lead_source: '',
     lead_status: 'new',
@@ -49,9 +65,35 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
   };
 
   const handleOpenCreateModal = () => setOpenCreateModal(true);
-  
+
   const handleCloseCreateModal = () => {
     setOpenCreateModal(false);
+    resetFormData();
+  };
+
+  const handleOpenAssignModal = (leadId) => {
+    const lead = leads.find((lead) => lead.id === leadId);
+    if (lead) {
+      setEditLeadId(leadId);
+      setFormData({
+        customer_name: lead.customer_name,
+        customer_phone: lead.customer_phone,
+        customer_email: lead.customer_email,
+        customer_company: lead.customer_company,
+        products: lead.products,
+        username: lead.username,
+        lead_source: lead.lead_source,
+        lead_status: lead.lead_status,
+        lead_value: lead.lead_value,
+        lead_description: lead.lead_description,
+        assigned_status: lead.assigned_status
+      });
+      setOpenAssignModal(true);
+    }
+  };
+
+  const handleCloseAssignModal = () => {
+    setOpenAssignModal(false);
     resetFormData();
   };
 
@@ -82,20 +124,47 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
     setOpenEditModal(false);
   };
 
+  // Customer modal
+  console.log('incentives', incentives);
+  const handleOpenCustomerModal = (leadId) => {
+    const lead = leads.find((lead) => lead.id === leadId);
+
+    if (lead) {
+      const incentive = incentives.find((inc) => inc.products === lead.products) ?? '';
+
+      // Set form data
+      setEditLeadId(leadId);
+      setFormData({
+        customer_name: lead.customer_name,
+        customer_phone: lead.customer_phone,
+        customer_email: lead.customer_email,
+        customer_company: lead.customer_company,
+        products: lead.products,
+        username: lead.username,
+        lead_source: lead.lead_source,
+        lead_status: lead.lead_status,
+        lead_value: lead.lead_value,
+        lead_description: lead.lead_description,
+        assigned_status: lead.assigned_status,
+        incPer: incentive?.incPer || '' // Default to empty string if not found
+      });
+      setOpenCustomerModal(true);
+    }
+  };
+
+  const handleCloseCustomerModal = () => {
+    setEditLeadId(null);
+    resetFormData();
+    setOpenCustomerModal(false);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'products') {
-      setFormData((prevState) => ({
-        ...prevState,
-        [name]: Array.isArray(value) ? value : [value]
-      }));
-    } else {
-      setFormData((prevState) => ({
-        ...prevState,
-        [name]: value
-      }));
-    }
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const resetFormData = () => {
@@ -104,7 +173,7 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
       customer_phone: '',
       customer_email: '',
       customer_company: '',
-      products: [],
+      products: '',
       username: '',
       lead_source: '',
       lead_status: 'new',
@@ -124,13 +193,9 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
     handleCloseEditModal();
   };
 
-  const getProductNames = (productIds) => {
-    return productIds
-      ?.map((productId) => {
-        const product = products?.find((prod) => prod.id === productId);
-        return product ? product.name : '';
-      })
-      .join(', ');
+  const getProductNames = (productId) => {
+    const product = products?.find((prod) => prod.id === productId);
+    return product ? product.name : '';
   };
 
   const getUserName = (userId) => {
@@ -187,9 +252,21 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
                   <IconButton onClick={() => handleOpenEditModal(lead.id)} aria-label="edit">
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDeleteLead(lead.id)} aria-label="delete">
-                    <DeleteIcon />
-                  </IconButton>
+                  {userRole === 'admin' && (
+                    <>
+                      <IconButton onClick={() => handleDeleteLead(lead.id)} aria-label="delete">
+                        <DeleteIcon />
+                      </IconButton>
+                      <IconButton onClick={() => handleOpenAssignModal(lead.id)} aria-label="assign">
+                        <PersonIcon />
+                      </IconButton>
+                    </>
+                  )}
+                  {lead?.lead_status !== 'closed' && (
+                    <Button variant="text" color="primary" style={{ paddingLeft: 10 }} onClick={() => handleOpenCustomerModal(lead.id)}>
+                      Convert
+                    </Button>
+                  )}
                 </StyledTableCell>
               </StyledTableRow>
             ))}
@@ -224,6 +301,26 @@ const AllLeads = ({ leads, products, users, handleCreateLead, handleUpdateLead, 
         formData={formData}
         products={products}
         users={users}
+      />
+      <AssignUserModal
+        open={openAssignModal}
+        handleClose={handleCloseAssignModal}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleUpdateLead}
+        formData={formData}
+        users={users}
+        leadId={editLeadId}
+      />
+
+      <CreateCustomerModal
+        open={openCustomerModal}
+        handleClose={handleCloseCustomerModal}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleConvertCustomer={handleConvertCustomer}
+        handleUpdateLead={handleUpdateLead}
+        products={products}
+        editLeadId={editLeadId}
       />
     </React.Fragment>
   );

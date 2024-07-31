@@ -45,7 +45,6 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && pr
 
 const MainLayout = () => {
   const theme = useTheme();
-  const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
   const leftDrawerOpened = useSelector((state) => state.customization.opened);
   const dispatch = useDispatch();
   const handleLeftDrawerToggle = () => {
@@ -70,7 +69,7 @@ const MainLayout = () => {
         </Toolbar>
       </AppBar>
 
-      <Sidebar drawerOpen={!matchDownMd ? leftDrawerOpened : !leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
+      <Sidebar drawerOpen={leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
 
       <Main theme={theme} open={leftDrawerOpened}>
         <Breadcrumbs separator={IconChevronRight} icon title rightAlign />

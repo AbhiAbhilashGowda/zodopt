@@ -18,13 +18,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIncentivesModal from './EditIncentivesModal';
 
-export default function IncentivesTable({ incentives, products, fetchIncentives, addIncentive, updateIncentive, deleteIncentive }) {
+export default function IncentivesTable({
+  incentives,
+  products,
+  userRole,
+  fetchIncentives,
+  addIncentive,
+  updateIncentive,
+  deleteIncentive
+}) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
   const [open, setOpen] = useState(false);
   const [currentIncentive, setCurrentIncentive] = useState(null);
   const [formData, setFormData] = useState({
-    products: [],
+    products: '',
     incPer: '',
     startDate: '',
     endDate: '',
@@ -55,7 +63,7 @@ export default function IncentivesTable({ incentives, products, fetchIncentives,
     setOpen(false);
     setCurrentIncentive(null);
     setFormData({
-      products: [],
+      products: '',
       incPer: '',
       startDate: '',
       endDate: '',
@@ -84,13 +92,9 @@ export default function IncentivesTable({ incentives, products, fetchIncentives,
     deleteIncentive(id);
   };
 
-  const getProductNames = (productIds) => {
-    return productIds
-      ?.map((productId) => {
-        const product = products?.find((prod) => prod.id === productId);
-        return product ? product.name : '';
-      })
-      .join(', ');
+  const getProductNames = (productId) => {
+    const product = products?.find((prod) => prod.id === productId);
+    return product ? product.name : '';
   };
 
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -140,9 +144,11 @@ export default function IncentivesTable({ incentives, products, fetchIncentives,
           <input placeholder="search" style={{ height: 30, width: 250, borderRadius: 3 }} />
         </span>
         <span>
-          <Button variant="contained" style={{ backgroundColor: '#111936', padding: '5px 25px' }} onClick={handleOpen}>
-            Create
-          </Button>
+          {userRole === 'admin' && (
+            <Button variant="contained" style={{ backgroundColor: '#111936', padding: '5px 25px' }} onClick={handleOpen}>
+              Create
+            </Button>
+          )}
         </span>
       </div>
 
@@ -159,9 +165,9 @@ export default function IncentivesTable({ incentives, products, fetchIncentives,
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleRows.map((incentive) => (
+            {visibleRows?.map((incentive) => (
               <TableRow key={incentive.id}>
-                <StyledTableCell>{getProductNames(incentive.products)}</StyledTableCell>
+                <StyledTableCell>{getProductNames(incentive?.products)}</StyledTableCell>
                 <StyledTableCell>{incentive.incPer}</StyledTableCell>
                 <StyledTableCell>{incentive.startDate}</StyledTableCell>
                 <StyledTableCell>{incentive.endDate}</StyledTableCell>

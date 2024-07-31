@@ -3,12 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { firestore } from 'firebase';
 import CustomersTable from 'ui-component/customers/CustomerTable';
+import { useSelector } from 'react-redux';
 
 const CustomersContainer = () => {
   const [customers, setCustomers] = useState([]);
   console.log('customers', customers);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const userRole = useSelector((state) => state?.authReducer?.userDetails?.roleDetails?.name);
+  const user_id = useSelector((state) => state?.authReducer?.userDetails?.user_id);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
 
   const fetchCustomers = async () => {
     try {
@@ -25,6 +29,16 @@ const CustomersContainer = () => {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => {
+    if (userRole === 'user') {
+      const userCustomers = customers.filter((lead) => lead.username === user_id);
+      setFilteredCustomers(userCustomers);
+    } else {
+      setFilteredCustomers(customers); // Show all leads if not a user
+    }
+  }, [userRole, user_id, customers]); // Re-run filtering logic when userRole, user_id, or leads change
 
   const fetchProducts = async () => {
     try {
@@ -47,13 +61,7 @@ const CustomersContainer = () => {
     console.log(formData);
 
     try {
-      const docRef = await addDoc(collection(firestore, 'customers'), {
-        customerName: formData.customerName,
-        products: formData.products,
-        cost: formData.cost,
-        incPer: formData.incPer,
-        incValue: formData.incValue
-      });
+      const docRef = await addDoc(collection(firestore, 'customers'), formData);
       console.log('Customer : ', docRef);
       console.log('Customer added with ID: ', docRef.id);
     } catch (error) {
@@ -65,13 +73,7 @@ const CustomersContainer = () => {
     console.log('customerId', customerId, formData);
     try {
       const customerRef = doc(firestore, 'customers', customerId);
-      await updateDoc(customerRef, {
-        customerName: formData.customerName,
-        products: formData.products,
-        cost: formData.cost,
-        incPer: formData.incPer,
-        incValue: formData.incValue
-      });
+      await updateDoc(customerRef, formData);
       console.log('Customer updated successfully:', customerId);
     } catch (error) {
       console.error('Error updating customer:', error);
@@ -96,8 +98,9 @@ const CustomersContainer = () => {
       {/* Render customers table with props */}
       {!loading && (
         <CustomersTable
-          customers={customers}
+          customers={filteredCustomers}
           products={products}
+          userRole={userRole}
           fetchCustomers={fetchCustomers}
           createCustomer={createCustomer}
           updateCustomer={updateCustomer}

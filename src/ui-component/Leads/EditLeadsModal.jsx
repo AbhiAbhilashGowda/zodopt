@@ -56,16 +56,19 @@ const EditLeadsModal = ({ open, handleClose, formData, handleInputChange, handle
             <Select
               labelId="products-label"
               id="products"
-              multiple
               fullWidth
-              value={formData.products} // Ensure formData.products is always an array
+              value={formData.products} // Ensure formData.products is a single value
               onChange={handleInputChange}
               name="products"
-              renderValue={(selected) => selected.map((id) => products.find((p) => p.id === id)?.name).join(', ')}
+              renderValue={(selected) => {
+                const product = products.find((p) => p.id === selected);
+                return product ? product.name : '';
+              }}
             >
               {getProductOptions()}
             </Select>
           </Grid>
+
           <Grid item xs={6}>
             <InputLabel id="customer-name-label">Customer Name</InputLabel>
             <TextField fullWidth variant="outlined" name="customer_name" value={formData.customer_name} onChange={handleInputChange} />

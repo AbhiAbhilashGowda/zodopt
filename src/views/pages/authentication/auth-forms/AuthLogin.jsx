@@ -82,6 +82,7 @@ const AuthLogin = ({ ...others }) => {
 
       const currentUser = {
         ...userDetails,
+        user_id : decodedToken.user_id,
         roleDetails: roleDetails
       };
       dispatch({

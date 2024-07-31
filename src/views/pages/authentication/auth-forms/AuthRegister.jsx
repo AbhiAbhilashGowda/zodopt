@@ -74,10 +74,10 @@ const AuthRegister = ({ ...others }) => {
       // Save additional user details in Firestore
       await setDoc(doc(db, 'users', user.uid), {
         name: values.name,
-        email:  values.email,
+        email: values.email,
         phone: values.phone,
         company: values.company,
-        role: 'A6ZMjqcK4XCiE5KOfkgR' // Default role
+        role: 'yaWtFNAh2flBOh5pCVqh' // Default role
       });
 
       // Get the ID token
@@ -96,6 +96,7 @@ const AuthRegister = ({ ...others }) => {
 
       const currentUser = {
         ...userDetails,
+        user_id: decodedToken.user_id,
         roleDetails: roleDetails
       };
       dispatch({

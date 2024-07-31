@@ -27,16 +27,18 @@ export default function CreateIncentiveModal({ open, handleClose, formData, setF
       <DialogTitle style={{ backgroundColor: '#f0f0f0', padding: '16px 24px', fontSize: 16 }}>Create Incentive</DialogTitle>
       <DialogContent style={{ padding: '30px' }}>
         <Grid container spacing={2}>
-        <Grid item xs={6}>
+          <Grid item xs={6}>
             <Select
               labelId="products-label"
               id="products"
-              multiple
               fullWidth
-              value={formData.products} // Ensure formData.products is always an array
+              value={formData.products} // Ensure formData.products is a single value
               onChange={handleInputChange}
               name="products"
-              renderValue={(selected) => selected.map((id) => products.find((p) => p.id === id)?.name).join(', ')}
+              renderValue={(selected) => {
+                const product = products?.find((p) => p?.id === selected);
+                return product ? product.name : '';
+              }}
             >
               {getProductOptions()}
             </Select>

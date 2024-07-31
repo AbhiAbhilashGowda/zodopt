@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { firestore } from 'firebase';
 import IncentivesTable from 'ui-component/Incentives/IncentivesTable';
+import { useSelector } from 'react-redux';
 
 const IncentivesContainer = () => {
   const [incentives, setIncentives] = useState([]);
   console.log('incentives', incentives);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const userRole = useSelector((state) => state?.authReducer?.userDetails?.roleDetails?.name);
 
   const fetchIncentives = async () => {
     try {
@@ -80,6 +82,7 @@ const IncentivesContainer = () => {
         <IncentivesTable
           incentives={incentives}
           products={products}
+          userRole={userRole}
           fetchIncentives={fetchIncentives}
           addIncentive={addIncentive}
           updateIncentive={updateIncentive}
